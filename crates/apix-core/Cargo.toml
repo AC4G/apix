@@ -1,0 +1,17 @@
+[package]
+name = "apix-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+libsql = "0.9.20"
+uuid = { version = "1", features = ["v4"] }
+wasmer = "3.1.1"
+smol = "2.0.2"
+log = "0.4.27"
+wasmer-wasi = "3.1.1"
+tempfile = "3.20.0"
+mlua = { version = "0.11.2", features = ["luau", "async", "serialize"] }

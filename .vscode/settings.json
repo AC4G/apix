@@ -1,0 +1,14 @@
+{
+    "yaml.schemas": {
+        "./crates/apix-core/templates/meta.schema.json": "**/apix-core/templates/meta.yml"
+    },
+    "Lua.diagnostics.globals": [
+        "create_monorepo",
+        "get_plugin_info",
+        "plugin_io"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-field",
+        "need-check-nil"
+    ]
+}

@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/apix-core",
+    "crates/apix-cli",
+]
+
+resolver = "2"

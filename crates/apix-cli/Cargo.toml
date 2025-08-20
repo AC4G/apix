@@ -1,0 +1,20 @@
+[package]
+name = "apix-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+apix-core = { path = "../apix-core" }
+clap = { version = "4", features = ["derive"] }
+serde_json = "1.0.142"
+smol = "2.0.2"
+lazy_static = "1.5.0"
+thiserror = "2.0.12"
+log = "0.4.27"
+env_logger = "0.11.8"
+serde = "1.0.219"
+serde_yaml = "0.9.34"
+futures = "0.3.31"
+
+[build-dependencies]
+directories = "6.0.0"

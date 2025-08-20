@@ -26,21 +26,5 @@ function create_monorepo(dst_path, template)
 
     print("Hellow from create_monorepo")
 
-    return {
-        name = "example-plugin",
-        version = {
-            major = 1,
-            minor = 0,
-            patch = 0
-        },
-        monorepo_templates = {
-            default = {
-                projects = "services",
-                packages = "libs"
-            }
-        },
-        supports = {
-            "create_monorepo"
-        }
-    }
+    return 0
 end

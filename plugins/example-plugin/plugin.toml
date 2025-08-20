@@ -1,0 +1,12 @@
+[plugin]
+name = "example-plugin"
+version = "0.1.0"
+description = "An example plugin for apix"
+
+[supported]
+# Actions supported by this plugin
+actions = ["create", "extend", "migrate", "help"]
+# Programming languages supported by this plugin
+languages = ["rust"]
+# features supported by this plugin, used in extend command
+features = ["cli"]

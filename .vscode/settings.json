@@ -3,9 +3,11 @@
         "./crates/apix-core/templates/meta.schema.json": "**/apix-core/templates/meta.yml"
     },
     "Lua.diagnostics.globals": [
-        "create_monorepo",
-        "get_plugin_info",
-        "plugin_io"
+        "create",
+        "extend",
+        "migrate",
+        "help",
+        "plugin_ctx"
     ],
     "Lua.diagnostics.disable": [
         "undefined-field",

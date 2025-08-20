@@ -1,11 +1,7 @@
 # Structure of the monorepo templates
 
 templates:
-  bazel:
-    projects: services
-    packages: libs
-  turborepo:
-    projects: apps
-    packages: packages
+  - bazel
+  - turborepo
 
 default: bazel

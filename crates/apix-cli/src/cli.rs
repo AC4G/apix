@@ -15,22 +15,22 @@ struct CLI {
 
 #[derive(Subcommand)]
 enum Commands {
-    Create {
+    Init {
         name: String,
 
         #[arg(short, long)]
         template: Option<String>,
-
-        #[arg(short, long)]
-        plugin: Option<String>,
     },
-    Rename {
-        old: String,
-        new: String
+    Install {
+        plugin_name: String,
+        version: Option<String>,
     },
-    ListProjects,
-    ListPlugins,
+    Update {
+        plugin_name: Option<String>,
+        version: Option<String>,
+    },
     Plugin {
+        plugin: String,
         #[command(subcommand)]
         command: PluginCommands,
     },
@@ -39,17 +39,20 @@ enum Commands {
 #[derive(Subcommand)]
 enum PluginCommands {
     Create {
-        name: String
+        name: String,
+    },
+    Extend {
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
     },
     Migrate,
-    #[command(external_subcommand)]
-    Custom(Vec<String>),
+    Help
 }
 
 pub fn init_cli() {
     let cli = CLI::parse();
 
-    if !matches!(cli.command, Commands::Create { .. }) {
+    if !matches!(cli.command, Commands::Init { .. }) {
         if let Err(_e) = connect_db(&get_config().db_path) {
             error!("Failed to connect to the DB. It may not be initialized in the current directory.");
             std::process::exit(1);
@@ -57,14 +60,42 @@ pub fn init_cli() {
     }
 
     match cli.command {
-        Commands::Create { name, plugin, template } => commands::create::create_monorepo(name, template, plugin),
-        Commands::Rename { old, new } => commands::rename::rename_project(old, new),
-        Commands::ListProjects => commands::list_projects::list_projects(),
-        Commands::ListPlugins => commands::list_plugins::list_plugins(),
-        Commands::Plugin { command } => match command {
-            PluginCommands::Create { name } => todo!(),
-            PluginCommands::Migrate => todo!(),
-            PluginCommands::Custom(args) => todo!(),
-        },
+    Commands::Init { name, template } => {
+        commands::init::create_monorepo(name, template)
     }
+
+    Commands::Install { plugin_name, version } => {
+        // install plugin if not already installed
+    }
+
+    Commands::Update { plugin_name, version } => {
+        // update installed plugins to the latest version or one to the latest or specified version
+    }
+
+    Commands::Plugin { plugin, command } => match command {
+        PluginCommands::Create { name } => {
+            // 1. Load monorepo.toml
+            // 2. Check plugin version & permissions
+            // 3. Call Lua plugin `create` with project name
+        }
+
+        PluginCommands::Extend { args } => {
+            // 1. Load monorepo.toml
+            // 2. Check plugin permissions
+            // 3. Call Lua plugin `extend` with args
+        }
+
+        PluginCommands::Migrate => {
+            // 1. Load monorepo.toml
+            // 2. Check plugin permissions
+            // 3. Call Lua plugin `migrate`
+        }
+
+        PluginCommands::Help => {
+            // 1. Load plugin
+            // 2. Call Lua plugin’s `help` function
+            // 3. Print output
+        }
+    },
+}
 }

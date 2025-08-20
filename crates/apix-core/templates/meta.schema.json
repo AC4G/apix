@@ -4,18 +4,7 @@
   "type": "object",
   "properties": {
     "templates": {
-      "type": "object",
-      "patternProperties": {
-        "^[a-zA-Z0-9_-]+$": {
-          "type": "object",
-          "properties": {
-            "projects": { "type": "string" },
-            "packages": { "type": "string" }
-          },
-          "required": ["projects", "packages"],
-          "additionalProperties": false
-        }
-      }
+      "type": "array"
     },
     "default": { "type": "string" }
   },

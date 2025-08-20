@@ -1,7 +1,7 @@
 use log::error;
-use mlua::{FromLuaMulti, Function, IntoLuaMulti, Result as LuaResult, Table};
+use mlua::{FromLuaMulti, Function, IntoLuaMulti, Result as LuaResult};
 use std::collections::HashSet;
-use crate::{loader::LuaPlugin, PluginInfo};
+use crate::loader::LuaPlugin;
 
 pub struct PluginAbi<'lua> {
     lua_plugin: &'lua LuaPlugin,
@@ -29,32 +29,20 @@ impl<'lua> PluginAbi<'lua> {
         func.call::<T>(args)
     }
 
-    pub fn get_plugin_info(&self) -> LuaResult<PluginInfo> {
-        self.call_fn("get_plugin_info", ())
+    pub fn create(&self, project_name: String) -> LuaResult<i32> {
+        self.call_fn("create", project_name)
     }
 
-    pub fn migrate(&self, from_major: u32, from_minor: u32, from_patch: u32) -> LuaResult<i32> {
-        self.call_fn("migrate", (from_major, from_minor, from_patch))
+    pub fn extend(&self, args: Vec<String>) -> LuaResult<i32> {
+        self.call_fn("extend", args)
     }
 
-    pub fn help(&self) -> LuaResult<String> {
+    pub fn migrate(&self, from_version: String) -> LuaResult<i32> {
+        self.call_fn("migrate", from_version)
+    }
+
+    pub fn help(&self) -> LuaResult<i32> {
         self.call_fn("help", ())
-    }
-
-    pub fn create_project(&self, name: String, temp_path: String) -> LuaResult<i32> {
-        self.call_fn("create_project", (name, temp_path))
-    }
-
-    pub fn create_package(&self, name: String, temp_path: String) -> LuaResult<i32> {
-        self.call_fn("create_package", (name, temp_path))
-    }
-
-    pub fn create_monorepo(&self, dst_path: String, template: String) -> LuaResult<i32> {
-        self.call_fn("create_monorepo", (dst_path, template))
-    }
-
-    pub fn custom_command(&self, command: String, args: Vec<String>) -> LuaResult<i32> {
-        self.call_fn("custom_command", (command, args))
     }
 }
 

@@ -2,8 +2,6 @@ use libsql::{Builder, Connection, Value};
 use smol::{fs, stream::StreamExt};
 use std::{error::Error, path::{Path, PathBuf}};
 
-use crate::{plugin::PluginInfo, TemplatePaths};
-
 pub struct Db {
     conn: Connection,
 }
@@ -24,10 +22,6 @@ impl Db {
 
     pub fn create_db_and_migrate(
         db_path: &Path,
-        monorepo_name: &str,
-        plugin: &Option<String>,
-        plugin_info: &Option<PluginInfo>,
-        template_paths: &Option<TemplatePaths>,
         template: &String
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         smol::block_on(async {
@@ -62,65 +56,10 @@ impl Db {
 
             let db = Self { conn: conn.clone() };
 
-            let plugin_id = if let Some(plugin_name) = plugin {
-                let plugin_info = plugin_info.clone().unwrap();
-                let version = plugin_info.version;
-
-                let plugin_id = Self::insert_plugin(&db, &plugin_name, &version.major, &version.minor, &version.patch).unwrap();
-
-                Some(plugin_id)
-            } else {
-                None
-            };
-
-            let plugin_id_value = plugin_id.map_or(libsql::Value::Null, |id| libsql::Value::Integer(id as i64));
-
-            let (projects, packages) = if let Some(template_paths) = template_paths {
-                (template_paths.projects.clone(), template_paths.packages.clone())
-            } else {
-                let plugin_info = plugin_info.as_ref().unwrap();
-                let templates = plugin_info.monorepo_templates.as_ref().unwrap();
-                let template_paths = templates.get(&template.clone()).unwrap();
-
-                (template_paths.projects.clone(), template_paths.packages.clone())
-            };
-
-            conn.execute(
-                "INSERT INTO monorepo (name, plugin, projects, packages) VALUES (?1, ?2, ?3, ?4);",
-                libsql::params![
-                    monorepo_name,
-                    plugin_id_value.clone(),
-                    projects,
-                    packages
-                ],
-            ).await.expect("Failed to store monorepo metadata");
-
-            let _ = Self::insert_event(&db, plugin_id_value, None, None, "create_monorepo", &format!("--template {}", template));
+            let _ = Self::insert_event(&db, Value::Null, None, None, "create_monorepo", &format!("--template {}", template));
         });
 
         Ok(())
-    }
-
-    pub fn insert_plugin(
-        &self,
-        name: &str,
-        major: &u32,
-        minor: &u32,
-        patch: &u32
-    ) -> Result<i64, Box<dyn Error + Send + Sync>> {
-        smol::block_on(async {
-            let mut rows = self.conn.query(
-                "INSERT INTO plugins (name, major, minor, patch) VALUES (?1, ?2, ?3, ?4) RETURNING id;",
-                libsql::params![name, major, minor, patch],
-            ).await?;
-
-            if let Some(row) = rows.next().await? {
-                let id: i64 = row.get(0)?;
-                Ok(id)
-            } else {
-                panic!("No id returned from insert");
-            }
-        })
     }
 
     pub fn event_exists(

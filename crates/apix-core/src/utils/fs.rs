@@ -27,13 +27,20 @@ pub fn copy_dir_recursive(src_dir: &Path, dst_dir: &Path) -> io::Result<()> {
     Ok(())
 }
 
-pub fn ensure_dir_and_copy_files(dest_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+pub fn ensure_dir_and_copy_files(
+    dest_dir: &Path,
+    src_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     if !dest_dir.exists() {
         fs::create_dir_all(dest_dir)?;
     }
 
     if !src_dir.exists() {
-        return Err(format!("Source directory {} does not exist", src_dir.to_str().unwrap()).into());
+        return Err(format!(
+            "Source directory {} does not exist",
+            src_dir.to_str().unwrap()
+        )
+        .into());
     }
 
     for entry in fs::read_dir(src_dir)? {

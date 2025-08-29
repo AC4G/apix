@@ -15,3 +15,7 @@ log = "0.4.27"
 wasmer-wasi = "3.1.1"
 tempfile = "3.20.0"
 mlua = { version = "0.11.2", features = ["luau", "async", "serialize"] }
+toml = "0.9.5"
+semver = "1.0.26"
+ansi_term = "0.12.1"
+chrono = "0.4.41"

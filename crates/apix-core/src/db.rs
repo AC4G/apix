@@ -1,6 +1,9 @@
 use libsql::{Builder, Connection, Value};
 use smol::{fs, stream::StreamExt};
-use std::{error::Error, path::{Path, PathBuf}};
+use std::{
+    error::Error,
+    path::{Path, PathBuf},
+};
 
 pub struct Db {
     conn: Connection,
@@ -13,24 +16,30 @@ impl Db {
                 return Err("Database does not exist".into());
             }
 
-            let db = Builder::new_local(db_path).build().await.expect("Failed to connect to DB");
+            let db = Builder::new_local(db_path)
+                .build()
+                .await
+                .expect("Failed to connect to DB");
             let conn = db.connect()?;
 
             Ok(Self { conn })
         })
     }
 
-    pub fn create_db_and_migrate(
-        db_path: &Path,
-        template: &String
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        smol::block_on(async {
-            let apix_dir = db_path.parent().ok_or("Invalid DB path: no parent directory").unwrap();
+    pub fn create_db_and_migrate(db_path: &Path) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        Ok(smol::block_on(async {
+            let apix_dir = db_path
+                .parent()
+                .ok_or("Invalid DB path: no parent directory")
+                .unwrap();
             if fs::metadata(&apix_dir).await.is_err() {
                 fs::create_dir_all(&apix_dir).await.unwrap();
             }
 
-            let db = Builder::new_local(db_path).build().await.expect("Failed to connect to DB");
+            let db = Builder::new_local(db_path)
+                .build()
+                .await
+                .expect("Failed to connect to DB");
             let conn = db.connect().unwrap();
 
             let mut migrations_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
@@ -54,12 +63,8 @@ impl Db {
                 conn.execute_batch(&sql).await.unwrap();
             }
 
-            let db = Self { conn: conn.clone() };
-
-            let _ = Self::insert_event(&db, Value::Null, None, None, "create_monorepo", &format!("--template {}", template));
-        });
-
-        Ok(())
+            Self { conn }
+        }))
     }
 
     pub fn event_exists(
@@ -68,7 +73,7 @@ impl Db {
         project: Option<String>,
         package: Option<String>,
         action: &str,
-        args: &str
+        args: &str,
     ) -> Result<bool, Box<dyn Error + Send + Sync>> {
         smol::block_on(async {
             let mut rows = self.conn.query(
@@ -91,7 +96,7 @@ impl Db {
         project: Option<String>,
         package: Option<String>,
         action: &str,
-        args: &str
+        args: &str,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         smol::block_on(async {
             self.conn.execute(

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use apix_core::internal_dir::InternalDir;
+use apix_core::utils::internal_dir::InternalDir;
 use smol::lock::OnceCell;
 
 lazy_static::lazy_static! {
@@ -14,8 +14,7 @@ pub fn init_internal_dir() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     smol::block_on(async {
-        INTERNAL_DIR.set(Arc::new(internal_dir))
-            .await.unwrap(); 
+        INTERNAL_DIR.set(Arc::new(internal_dir)).await.unwrap();
     });
 
     Ok(())

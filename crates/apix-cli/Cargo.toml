@@ -15,6 +15,7 @@ env_logger = "0.11.8"
 serde = "1.0.219"
 serde_yaml = "0.9.34"
 futures = "0.3.31"
+ansi_term = "0.12.1"
 
 [build-dependencies]
 directories = "6.0.0"

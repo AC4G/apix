@@ -3,13 +3,14 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::plugin::plugin_ctx::logger::PluginLogger;
-use crate::plugin::plugin_ctx::{ask, files, logger};
+use crate::plugin::plugin_ctx::{ask, files, logger, system};
 
 #[derive(Debug)]
 pub enum Proposal {
     CreateFile { path: String, content: String },
     ModifyFile { path: String, content: String },
     DeleteFile { path: String },
+    SystemCommand { command: String, args: Vec<String> },
 }
 
 #[derive(Debug)]
@@ -34,6 +35,7 @@ impl PluginCtx {
         logger::register_logger_functions(lua, ctx.borrow().logger.clone(), &table)?;
         ask::register_ask_function(lua, ctx.clone(), &table)?;
         files::register_file_functions(lua, ctx.clone(), &table)?;
+        system::register_system_functions(lua, ctx.clone(), &table)?;
 
         Ok(table)
     }

@@ -53,13 +53,13 @@ impl LuaDir {
 
 impl UserData for LuaFile {
     fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("read", |_, this, ()| {
-            match this.read() {
-                Ok(content) => Ok(content),
-                Err(e) => Err(mlua::Error::external(e)),
-            }
+        methods.add_method("read", |_, this, ()| match this.read() {
+            Ok(content) => Ok(content),
+            Err(e) => Err(mlua::Error::external(e)),
         });
-        methods.add_method("path", |_, this, ()| Ok(this.path.to_string_lossy().to_string()));
+        methods.add_method("path", |_, this, ()| {
+            Ok(this.path.to_string_lossy().to_string())
+        });
     }
 }
 
@@ -75,9 +75,11 @@ impl UserData for LuaDir {
             }
             Ok(table)
         });
-        methods.add_method("path", |_, this, ()| Ok(this.path.to_string_lossy().to_string()));
+        methods.add_method("path", |_, this, ()| {
+            Ok(this.path.to_string_lossy().to_string())
+        });
     }
-    
+
     fn register(registry: &mut mlua::UserDataRegistry<Self>) {
         Self::add_fields(registry);
         Self::add_methods(registry);

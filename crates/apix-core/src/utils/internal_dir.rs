@@ -1,12 +1,12 @@
 use std::{env, fs, path::PathBuf};
 
-use crate::fs_utils::ensure_dir_and_copy_files;
+use crate::utils::fs::ensure_dir_and_copy_files;
 
 #[derive(Debug)]
 pub struct InternalDir {
     templates_dir: PathBuf,
     migrations_dir: PathBuf,
-    plugins_dir: PathBuf
+    plugins_dir: PathBuf,
 }
 
 impl InternalDir {
@@ -26,8 +26,10 @@ impl InternalDir {
         let templates_src = crate_root.join("templates");
         let migrations_src = crate_root.join("migrations");
 
-        ensure_dir_and_copy_files(&templates_dir, &templates_src).expect("Failed to copy templates");
-        ensure_dir_and_copy_files(&migrations_dir, &migrations_src).expect("Failed to copy migrations");
+        ensure_dir_and_copy_files(&templates_dir, &templates_src)
+            .expect("Failed to copy templates");
+        ensure_dir_and_copy_files(&migrations_dir, &migrations_src)
+            .expect("Failed to copy migrations");
 
         if !plugins_dir.exists() {
             fs::create_dir_all(&plugins_dir).expect("Failed to create plugins directory");

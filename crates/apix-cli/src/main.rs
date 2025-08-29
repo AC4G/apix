@@ -1,16 +1,16 @@
 mod cli;
-mod db;
 mod config;
-mod internal_dir;
+mod db;
+mod logger;
+mod plugin;
+mod utils;
 
-use env_logger::Env;
-use crate::{cli::init_cli, internal_dir::init_internal_dir};
+use crate::{cli::init_cli, logger::init_logger, utils::internal_dir::init_internal_dir};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-
+    init_logger();
     init_internal_dir().expect("Failed to initialize internal directory");
     init_cli();
-    
+
     Ok(())
 }

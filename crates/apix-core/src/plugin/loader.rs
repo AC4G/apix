@@ -1,8 +1,12 @@
 use mlua::{Lua, Result};
-use std::{fs, path::{Path, PathBuf}, rc::Rc, cell::RefCell};
+use std::{
+    cell::RefCell,
+    fs,
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
-use crate::ctx::PluginCtx;
-use crate::file_tree::LuaDir;
+use crate::plugin::{file_tree::LuaDir, plugin_ctx::ctx::PluginCtx};
 
 pub struct LuaPlugin {
     pub name: String,
@@ -12,12 +16,13 @@ pub struct LuaPlugin {
 impl LuaPlugin {
     pub fn load(
         name: &str,
-        plugin_dir: &Path,
-        monorepo_root: PathBuf,
+        plugins_dir: &Path,
+        plugin_version: &str,
+        monorepo_root: &PathBuf,
         ctx: Rc<RefCell<PluginCtx>>,
     ) -> Result<Self> {
-        let lua_path = plugin_dir.join(format!("{}/{}.lua", name, name));
-        let luau_path = plugin_dir.join(format!("{}/{}.luau", name, name));
+        let lua_path = plugins_dir.join(format!("{}/{}/{}.lua", name, plugin_version, name));
+        let luau_path = plugins_dir.join(format!("{}/{}/{}.luau", name, plugin_version, name));
 
         let plugin_path = if lua_path.exists() {
             lua_path
@@ -32,26 +37,27 @@ impl LuaPlugin {
 
         let lua = Lua::new();
 
-        let data_dir = plugin_dir.join(name).join("data");
+        let data_dir = plugins_dir.join(format!("{}/{}/data", name, plugin_version));
         if !data_dir.exists() {
             fs::create_dir_all(&data_dir)?;
         }
 
-        let canon_plugin_data_dir = fs::canonicalize(&data_dir)
-            .expect("Failed to canonicalize plugin data dir");
-        let canon_monorepo_root = fs::canonicalize(&monorepo_root)
-            .expect("Failed to canonicalize monorepo root");
+        let canon_plugin_data_dir =
+            fs::canonicalize(&data_dir).expect("Failed to canonicalize plugin data dir");
+        let canon_monorepo_root =
+            fs::canonicalize(&monorepo_root).expect("Failed to canonicalize monorepo root");
 
         let root_dir = LuaDir::scan(&canon_monorepo_root)?;
-        let root_dir_userdata = lua.create_userdata(root_dir)?;
-        let data_dir_userdata = lua.create_userdata(LuaDir::scan(&canon_plugin_data_dir)?)?;
+        let root_dir_monorepodata = lua.create_userdata(root_dir)?;
+        let data_dir = LuaDir::scan(&canon_plugin_data_dir)?;
+        let data_dir_plugindata = lua.create_userdata(data_dir)?;
 
         let lua_ctx_table = PluginCtx::register(&lua, ctx.clone())?;
 
         let globals = lua.globals();
-        globals.set("plugin_ctx", lua_ctx_table)?;
-        globals.set("root_dir", root_dir_userdata)?;
-        globals.set("plugin_data_dir", data_dir_userdata)?;
+        globals.set("ctx", lua_ctx_table)?;
+        globals.set("monorepo_root_dir", root_dir_monorepodata)?;
+        globals.set("plugin_data_dir", data_dir_plugindata)?;
 
         let plugin_code = fs::read_to_string(&plugin_path)?;
         lua.load(&plugin_code).exec()?;

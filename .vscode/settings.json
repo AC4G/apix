@@ -7,7 +7,9 @@
         "extend",
         "migrate",
         "help",
-        "plugin_ctx"
+        "ctx",
+        "monorepo_root_dir",
+        "plugin_data_dir",
     ],
     "Lua.diagnostics.disable": [
         "undefined-field",
